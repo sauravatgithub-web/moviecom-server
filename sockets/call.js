@@ -1,6 +1,6 @@
 import { getSockets } from "../lib/helper.js";
 
-export const callCommands = (io, socket, userSocketIDs, onlineUsers) => {
+export const callCommands = (socket, userSocketIDs) => {
     const user = socket.user;
     if(user && user._id) userSocketIDs.set(user._id.toString(), socket.id);
 

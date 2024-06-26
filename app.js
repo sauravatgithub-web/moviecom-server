@@ -14,6 +14,7 @@ import { socketAuthenticator } from './middlewares/auth.js';
 import { errorMiddleware } from './middlewares/error.js';
 import { messagingCommands } from './sockets/messaging.js';
 import { callCommands } from './sockets/call.js';
+import { movieCommands } from './sockets/movie.js';
 
 dotenv.config({
     path: "./.env",
@@ -61,7 +62,8 @@ io.use((socket, next) => {
 
 io.on("connection", (socket) => {
     messagingCommands(io, socket, userSocketIDs, onlineUsers);
-    callCommands(io, socket, userSocketIDs, onlineUsers);
+    callCommands(socket, userSocketIDs);
+    movieCommands(io, socket, userSocketIDs, onlineUsers);
 })
 
 app.use(errorMiddleware);
