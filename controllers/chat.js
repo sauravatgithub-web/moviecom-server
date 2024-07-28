@@ -14,14 +14,13 @@ const getMyChat = tryCatch( async(req, res, next) => {
         "name avatar"
     );
 
-    const transformedChats = chats.map(({ _id, name, members, groupChat }) => {
-
+    const transformedChats = chats.map(({ _id, name, members, groupChat, avatar }) => {
         const otherMember = getOtherMember(members, req.user);
 
         return {
             _id,
             groupChat, 
-            avatar: groupChat ? members.slice(0, 3).map(({avatar}) => avatar.url) : [otherMember.avatar.url],
+            avatar: groupChat ? [avatar.get('group')] : [otherMember.avatar.url],
             name: groupChat ? name : otherMember.name,
             members: members.reduce((prev, curr) => {
                 if(curr._id.toString() !== req.user.toString()) {
@@ -41,14 +40,17 @@ const newGroupChat = tryCatch( async(req, res, next) => {
 
     const allMembers = [ ...members, req.user ];
 
-    const group = await Chat.create({
+    await Chat.create({
         name, 
         groupChat: true,
         creator: req.user,
         members: allMembers,
+        avatar: {
+            1: "https://res.cloudinary.com/dzlktmmtw/image/upload/v1722174945/group_cvdgq2.png"
+        }
     })
 
-    emitEvent(req, ALERT, allMembers, `Welcome to ${name} group`);
+    emitEvent(req, ALERT, members, `Welcome to ${name} group`);
     emitEvent(req, REFETCH_CHATS, members);
 
     return res.status(201).json({
@@ -64,11 +66,11 @@ const getMyGroups = tryCatch(async(req, res, next) => {
         creator: req.user,
     }).populate("members", "name avatar");
 
-    const groups = chats.map(({ members, _id, groupChat, name }) => ({
+    const groups = chats.map(({ avatar , _id, groupChat, name }) => ({
         _id, 
         groupChat,
         name,
-        avatar : members.slice(0, 3).map(({ avatar }) => avatar.url),
+        avatar: [avatar.get('group')]
     }));
 
     return res.status(200).json({ success: true, groups});
@@ -212,7 +214,7 @@ const getChatDetails = tryCatch(async(req, res, next) => {
         chat.members = chat.members.map(({ _id, name, avatar }) => ({
             _id,
             name,
-            avatar: avatar.url
+            // avatar: avatar.get('group')
         }))
 
         return res.status(200).json({ success: true, chat });

@@ -2,14 +2,48 @@ import bcrypt from 'bcrypt'
 import { User } from '../models/user.js'
 import { cookieOption, emitEvent, sendToken, uploadFilesFromCloudinary } from '../utils/features.js';
 import { tryCatch } from '../middlewares/error.js';
-import { ErrorHandler } from '../utils/utility.js';
+import { ErrorHandler, sendEmail } from '../utils/utility.js';
 import { Chat } from '../models/chat.js';
 import { Request } from '../models/request.js'
 import { NEW_NOTIFICATION, NEW_REQUEST, REFETCH_CHATS } from '../constants/events.js';
 import { getOtherMember } from '../lib/helper.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
+const emailTokens = {};
+
+const sendOTP = async(email, message, next) => {
+    const otp = (Math.floor(100000 + Math.random() * 900000)).toString();
+    const expirationTime = new Date(Date.now() + (2 * 60 * 60 * 1000));
+    const sharedToken = `${otp}`;
+  
+    try {
+        await sendEmail(email, message, sharedToken);
+        emailTokens[email] = {otp, expirationTime};
+    } 
+    catch (error) {
+        next(new ErrorHandler("Failed to send OTP email", 500));
+    }
+}
+
+const confirmOTP = tryCatch(async(req, res, next) => {
+    const { email, otp } = req.body;
+    if(!email || !otp)
+      return next(new ErrorHandler("Please fill all fields", 404));
+  
+    const sharedOTP = emailTokens[email];
+  
+    if(sharedOTP && sharedOTP.otp == otp && Date.now() < sharedOTP.expirationTime) {
+      return res.status(200).json({ success: true, message: "OTP has been successfully verified." });
+    }
+    else if(sharedOTP && sharedOTP.otp != otp) {
+      return res.status(400).json({ success: false, message: "Incorrect OTP entered." });
+    }
+    else return res.status(400).json({ success: false, message: "OTP expired." });
+})
 
 const newUser = tryCatch(async (req, res, next) => {
-    const {name, username, password, bio, email} = req.body;
+    const {name, username, password, email} = req.body;
 
     const file = req.file;
     if(!file) return next(new ErrorHandler('Please upload avatar'));
@@ -25,7 +59,6 @@ const newUser = tryCatch(async (req, res, next) => {
         name,
         username,
         password,
-        bio,
         avatar,
         email
     });
@@ -47,6 +80,18 @@ const login = tryCatch(async(req, res, next) => {
 
     sendToken(res, user, 200, `Welcome back, ${user.name}`);
     return user;
+})
+
+const forgetPassword = tryCatch(async(req, res, next) => {
+    const { username } = req.body;
+    if(!username) return next(new ErrorHandler("Please fill all the fields", 404));
+  
+    const user = await User.findOne({ username }).select("+password");
+    if(!user) return next(new ErrorHandler("User do not exists", 404));
+    
+    const email = user.email;
+    sendOTP(email, "Forget Password", next);
+    return res.status(200).json({ success: true });
 })
 
 const saveToken = tryCatch(async(req, res, next) => {
@@ -195,4 +240,17 @@ const getMyFriends = tryCatch(async(req, res) => {
     }
 })
 
-export { acceptRequest, getMyProfile, getNotifications, getMyFriends, login, logOut, newUser, searchUser, sendRequest, saveToken };
+export { 
+    acceptRequest, 
+    getMyProfile, 
+    getNotifications, 
+    getMyFriends, 
+    login, 
+    logOut, 
+    newUser, 
+    searchUser, 
+    sendRequest, 
+    saveToken, 
+    forgetPassword,
+    confirmOTP
+};

@@ -34,7 +34,6 @@ const emitEvent = (req, event, users, data) => {
         if(!io) console.log("Socket.io instance not availaible")
         const usersSockets = getSockets(users);
         io.to(usersSockets).emit(event, data);
-        console.log("Event emitted successfully", event);
     }
     catch (error) {console.log(error)}
 };

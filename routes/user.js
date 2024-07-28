@@ -9,7 +9,9 @@ import {
     newUser, 
     searchUser, 
     sendRequest, 
-    saveToken 
+    saveToken,
+    forgetPassword ,
+    confirmOTP
 } from '../controllers/user.js'
 import { singleAvatar } from '../middlewares/multer.js';
 import { isAuthenticated } from '../middlewares/auth.js';
@@ -25,6 +27,8 @@ const router = express.Router();
 // user must not be logged in
 router.post('/new', singleAvatar, registerValidator(), validate, newUser);
 router.post('/login', loginValidator(), validate, login);
+router.post('/send', forgetPassword);
+router.post('/confirm', confirmOTP);
 router.post('/savetoken', saveToken);
 
 // user must be logged in
