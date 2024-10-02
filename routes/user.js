@@ -11,7 +11,8 @@ import {
     sendRequest, 
     saveToken,
     forgetPassword ,
-    confirmOTP
+    confirmOTP,
+    updateUserProfile
 } from '../controllers/user.js'
 import { singleAvatar } from '../middlewares/multer.js';
 import { isAuthenticated } from '../middlewares/auth.js';
@@ -34,6 +35,7 @@ router.post('/savetoken', saveToken);
 // user must be logged in
 router.use(isAuthenticated); 
 router.get("/me", getMyProfile);
+router.put("/updateUserProfile", updateUserProfile);
 router.get("/logOut", logOut);
 router.get("/searchUser", searchUser);
 router.put("/sendRequest", sendRequestValidator(), validate, sendRequest);

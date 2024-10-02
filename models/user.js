@@ -4,6 +4,7 @@ const schema = new Schema(
     {   
         bio: {
             type: String,
+            default: "Hi, I am using moviecom"
         },
         name: {
             type: String,

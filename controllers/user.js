@@ -60,7 +60,7 @@ const newUser = tryCatch(async (req, res, next) => {
         username,
         password,
         avatar,
-        email
+        email,
     });
 
     sendToken(res, user, 200, `Welcome to moviecom`);
@@ -115,6 +115,16 @@ const getMyProfile = tryCatch(async(req, res) => {
         user
     })
 });
+
+const updateUserProfile = tryCatch(async(req, res) => {
+    const { userId, about } = req.body;
+    const user = await User.findById(userId);
+    if(!user) return next(new ErrorHandler("Incorrect user id"));
+
+    user.bio = about;
+    await user.save();
+    return res.status(200).json({ success : true, message : "Bio updated successfully" });
+})
 
 const logOut = tryCatch(async(req, res) => {
     return res
@@ -252,5 +262,6 @@ export {
     sendRequest, 
     saveToken, 
     forgetPassword,
-    confirmOTP
+    confirmOTP,
+    updateUserProfile
 };
