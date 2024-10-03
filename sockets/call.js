@@ -17,12 +17,12 @@ export const callCommands = (socket, userSocketIDs) => {
         socket.to(membersSocket).emit('call-ended-before-recieving');
     })
 
-    socket.on('reject-call', ({callMembers}) => {
+    socket.on('reject-call', ({ callMembers }) => {
         const membersSocket = getSockets(callMembers);
         socket.to(membersSocket).emit('call-rejected');
     })
 
-    socket.on('accept-call', ({callMembers, room, ans}) => {
+    socket.on('accept-call', ({ callMembers, room, ans }) => {
         const membersSocket = getSockets(callMembers);
         socket.to(membersSocket).emit('call-accepted', {callMembers, room, ans});
     })
