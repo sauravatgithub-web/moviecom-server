@@ -46,7 +46,7 @@ const newGroupChat = tryCatch( async(req, res, next) => {
         creator: req.user,
         members: allMembers,
         avatar: {
-            1: "https://res.cloudinary.com/dzlktmmtw/image/upload/v1722174945/group_cvdgq2.png"
+            group: "https://res.cloudinary.com/dzlktmmtw/image/upload/v1722174945/group_cvdgq2.png"
         }
     })
 
@@ -205,25 +205,18 @@ const sendAttachment = tryCatch(async(req, res, next) => {
 })
 
 const getChatDetails = tryCatch(async(req, res, next) => {
-    if(req.query.populate === "true") {
-        const chat = await Chat.findById(req.params.id)
-            .populate("members", "name avatar")
-            .lean();
-        if(!chat) return next(new ErrorHandler("Chat not found", 404));
+    const chat = await Chat.findById(req.params.id)
+        .populate("members", "name avatar bio username createdAt")
+        .lean();
+    if(!chat) return next(new ErrorHandler("Chat not found", 404));
 
-        chat.members = chat.members.map(({ _id, name, avatar }) => ({
-            _id,
-            name,
-            // avatar: avatar.get('group')
-        }))
+    chat.members = chat.members.map(({ _id, name, avatar, bio, username, createdAt }) => ({
+        _id,
+        name, avatar,
+        bio, username, createdAt
+    }))
 
-        return res.status(200).json({ success: true, chat });
-    }
-    else {
-        const chat = await Chat.findById(req.params.id);
-        if(!chat) return next(new ErrorHandler("Chat not found", 404));
-        return res.status(200).json({ success: true, chat });
-    }
+    return res.status(200).json({ success: true, chat });
 })
 
 const renameGroup = tryCatch(async(req, res, next) => {
