@@ -6,7 +6,7 @@ import { isAdmin } from '../middlewares/auth.js';
 const router = express.Router();
 
 router.post("/verify", adminLoginValidator(), validate, adminLogin);
-router.get("/logout", adminLogout);
+router.post("/logout", adminLogout);
 
 // only admin can access
 router.use(isAdmin);
