@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv';
 import { User } from '../models/user.js'
 import { Chat } from '../models/chat.js';
