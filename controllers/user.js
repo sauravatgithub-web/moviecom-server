@@ -1,13 +1,13 @@
 import bcrypt from 'bcrypt'
+import dotenv from 'dotenv';
 import { User } from '../models/user.js'
-import { cookieOption, emitEvent, sendToken, uploadFilesFromCloudinary } from '../utils/features.js';
-import { tryCatch } from '../middlewares/error.js';
-import { ErrorHandler, sendEmail } from '../utils/utility.js';
 import { Chat } from '../models/chat.js';
 import { Request } from '../models/request.js'
-import { NEW_NOTIFICATION, NEW_REQUEST, REFETCH_CHATS } from '../constants/events.js';
 import { getOtherMember } from '../lib/helper.js';
-import dotenv from 'dotenv';
+import { tryCatch } from '../middlewares/error.js';
+import { ErrorHandler, sendEmail } from '../utils/utility.js';
+import { NEW_NOTIFICATION, NEW_REQUEST, REFETCH_CHATS } from '../constants/events.js';
+import { cookieOption, emitEvent, sendToken, uploadFilesFromCloudinary } from '../utils/features.js';
 
 dotenv.config();
 const emailTokens = {};
@@ -42,6 +42,20 @@ const confirmOTP = tryCatch(async(req, res, next) => {
     else return res.status(400).json({ success: false, message: "OTP expired." });
 })
 
+const setNewPassword = tryCatch(async (req, res, next) => {
+    const {email, password} = req.body;
+    if(!email || !password) return next(new ErrorHandler("Please enter all fields"));
+
+    const user = await User.findOne({ email }).select("+password");;
+    if(!user) return next(new ErrorHandler("Incorrect username"));
+
+    user.password = password;
+    await user.save();
+    console.log(user.password);
+
+    return res.status(200).json({ success: true, message: "Password changed successfully" });
+})
+ 
 const newUser = tryCatch(async (req, res, next) => {
     const {name, username, password, email} = req.body;
 
@@ -263,5 +277,6 @@ export {
     saveToken, 
     forgetPassword,
     confirmOTP,
-    updateUserProfile
+    updateUserProfile,
+    setNewPassword
 };

@@ -1,11 +1,11 @@
-import { adminSecretKey } from "../app.js";
-import { tryCatch } from "../middlewares/error.js";
+import jwt from "jsonwebtoken";
 import { Chat } from "../models/chat.js";
-import { Message } from "../models/message.js";
 import { User } from "../models/user.js";
+import { adminSecretKey } from "../app.js";
+import { Message } from "../models/message.js";
+import { tryCatch } from "../middlewares/error.js";
 import { cookieOption } from "../utils/features.js";
 import { ErrorHandler, returnFn } from "../utils/utility.js";
-import jwt from "jsonwebtoken";
 
 const adminLogin = tryCatch(async(req, res, next) => {
     const { secretKey } = req.body;

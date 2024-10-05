@@ -12,7 +12,8 @@ import {
     saveToken,
     forgetPassword ,
     confirmOTP,
-    updateUserProfile
+    updateUserProfile,
+    setNewPassword
 } from '../controllers/user.js'
 import { singleAvatar } from '../middlewares/multer.js';
 import { isAuthenticated } from '../middlewares/auth.js';
@@ -25,14 +26,13 @@ import {
 } from '../lib/validator.js';
 const router = express.Router();
 
-// user must not be logged in
 router.post('/new', singleAvatar, registerValidator(), validate, newUser);
 router.post('/login', loginValidator(), validate, login);
 router.post('/send', forgetPassword);
 router.post('/confirm', confirmOTP);
 router.post('/savetoken', saveToken);
+router.post('/setNewPassword', setNewPassword);
 
-// user must be logged in
 router.use(isAuthenticated); 
 router.get("/me", getMyProfile);
 router.put("/updateUserProfile", updateUserProfile);

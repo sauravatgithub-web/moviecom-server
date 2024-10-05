@@ -1,12 +1,12 @@
+import CryptoJS from "crypto-js";
 import { User } from "../models/user.js"
 import { Chat } from "../models/chat.js"
 import { Message } from "../models/message.js";
+import { getOtherMember } from "../lib/helper.js";
 import { tryCatch } from "../middlewares/error.js";
 import { ErrorHandler } from "../utils/utility.js";
 import { ALERT, NEW_MESSAGE, NEW_MESSAGE_ALERT, REFETCH_CHATS } from "../constants/events.js";
 import { deleteFilesFromCloudinary, emitEvent, uploadFilesFromCloudinary } from "../utils/features.js";
-import { getOtherMember } from "../lib/helper.js";
-import CryptoJS from "crypto-js";
 
 const getMyChat = tryCatch( async(req, res, next) => {
     const chats = await Chat.find({ members: req.user }).populate(

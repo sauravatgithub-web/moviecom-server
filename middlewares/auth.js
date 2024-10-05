@@ -1,7 +1,7 @@
-import { adminSecretKey } from "../app.js";
-import { User } from "../models/user.js";
-import { ErrorHandler } from "../utils/utility.js";
 import jwt from "jsonwebtoken";
+import { User } from "../models/user.js";
+import { adminSecretKey } from "../app.js";
+import { ErrorHandler } from "../utils/utility.js";
 
 const isAuthenticated = (req, res, next) => {
     const token = req.cookies['app-token'];
